@@ -44,7 +44,7 @@ if(window.gsap&&window.ScrollTrigger){
  gsap.registerPlugin(ScrollTrigger);
  ScrollTrigger.config({ignoreMobileResize:true});
  const media=gsap.matchMedia();
- media.add('(prefers-reduced-motion: no-preference)',()=>{
+ media.add('all',()=>{
   gsap.fromTo('.hero-enter',{y:20,opacity:0},{y:0,opacity:1,duration:.8,stagger:.09,ease:'power3.out',clearProps:'opacity,transform'});
   gsap.fromTo('.hero-stage',{y:25,opacity:0},{y:0,opacity:1,duration:1,ease:'power3.out',delay:.15,clearProps:'opacity,transform'});
   document.querySelectorAll('.reveal').forEach(el=>{

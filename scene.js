@@ -10,7 +10,8 @@
  const stage=canvas.parentElement,button=document.getElementById('motion-toggle');
  const status=document.getElementById('motion-status');
  const preference=window.matchMedia('(prefers-reduced-motion: reduce)');
- let paused=preference.matches,visible=true,raf=0,last=0,time=0,frames=0;
+ let paused=false,visible=true,raf=0,last=0,time=0,frames=0;
+ let fallback=0,lastRaf=performance.now();
  let w=0,h=0,dpr=1,target=0,pointer=0;
  const mobile=()=>window.matchMedia('(pointer: coarse)').matches||window.innerWidth<800;
  function resize(){
@@ -81,7 +82,7 @@
   frames++;canvas.dataset.frame=String(frames);canvas.dataset.time=String(Math.round(time));
  }
  function tick(now){
-  raf=0;if(paused||!visible||document.hidden){last=0;return;}
+  raf=0;lastRaf=performance.now();if(fallback){clearTimeout(fallback);fallback=0;}if(paused||!visible||document.hidden){last=0;return;}
   const delay=mobile()?1000/30:1000/60;
   if(!last){last=now;}
   const dt=now-last;
@@ -93,18 +94,35 @@
   document.documentElement.classList.toggle('motion-paused',paused);
   button.setAttribute('aria-pressed',String(paused));button.setAttribute('aria-label',paused?'Play animation':'Pause animation');
   button.querySelector('.motion-icon').textContent=paused?'▶':'Ⅱ';button.querySelector('.motion-label').textContent=paused?'Play':'Pause';
-  status.textContent=paused?(preference.matches?'Reduced motion · tap Play':'Motion paused'):'Live motion';
-  if(paused&&raf){cancelAnimationFrame(raf);raf=0;last=0;}else start();
+  status.textContent=paused?'Motion paused':'Live motion';
+  if(paused){if(raf)cancelAnimationFrame(raf);raf=0;last=0;clearTimeout(fallback);fallback=0;}else start();
   document.dispatchEvent(new CustomEvent('earthguard:motion',{detail:{paused}}));
  }
  button.addEventListener('click',()=>{paused=!paused;sync();});
- const onPreference=()=>{paused=preference.matches;sync();draw();};
+ // Playback is a site-level choice. Phone preference changes cannot reset Pause.
+ const onPreference=()=>{draw();};
  if(preference.addEventListener)preference.addEventListener('change',onPreference);else preference.addListener(onPreference);
  document.addEventListener('visibilitychange',()=>{if(document.hidden&&raf){cancelAnimationFrame(raf);raf=0;last=0;}else start();});
- if('IntersectionObserver' in window){new IntersectionObserver(entries=>{
-  visible=entries[0].isIntersecting;
+ // Geometry is the visibility authority; embedded browsers can delay or omit
+ // IntersectionObserver callbacks. Keep the observer as a prompt, not a gate.
+ function checkVisibility(){
+  const rect=stage.getBoundingClientRect();visible=rect.bottom>-80&&rect.top<innerHeight+80;
   if(!visible&&raf){cancelAnimationFrame(raf);raf=0;last=0;}else start();
- },{rootMargin:'80px'}).observe(stage);}
+ }
+ if('IntersectionObserver' in window){new IntersectionObserver(checkVisibility,{rootMargin:'80px'}).observe(stage);}
+ window.addEventListener('scroll',checkVisibility,{passive:true});
+ window.addEventListener('pageshow',()=>{checkVisibility();lastRaf=performance.now();start();});
+ // A low-frequency watchdog handles WebViews that suspend rAF while visible.
+ // The timeout path is only active while rAF is stale, never alongside it.
+ function fallbackTick(){
+  fallback=0;
+  if(paused||document.hidden||!visible||performance.now()-lastRaf<350)return;
+  time+=40;draw();fallback=setTimeout(fallbackTick,40);
+ }
+ setInterval(()=>{
+  checkVisibility();
+  if(!paused&&visible&&!document.hidden&&!fallback&&performance.now()-lastRaf>350){fallbackTick();}
+ },400);
  stage.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'){const rect=stage.getBoundingClientRect();target=((e.clientX-rect.left)/rect.width-.5)*2;}});
  stage.addEventListener('pointerleave',()=>target=0);
  if('ResizeObserver' in window)new ResizeObserver(resize).observe(stage);else window.addEventListener('resize',resize);

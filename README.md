@@ -1,4 +1,4 @@
-# EarthGuard Premium — version 2.0.0
+# EarthGuard Premium — version 2.0.1
 
 A complete visual upgrade of the existing EarthGuard website. Cobalt, charcoal,
 self-hosted Inter typography, real category photographs and a live dimensional
@@ -16,12 +16,12 @@ build step, CDN, API key or external animation script is required.
 
 ## Update your existing repository
 
-Extract `earthguard-premium-v2.zip` in Downloads. It contains `earthguard-site`.
+Extract `earthguard-animation-fixed.zip` in Downloads. It contains `earthguard-site`.
 Copy those files into the repository you already cloned. Keep its `.git` folder.
 
 ```powershell
 cd C:\Users\vishvas\Downloads
-Copy-Item -Path ".\earthguard-premium-v2\earthguard-site\*" -Destination ".\earthguard-website-update" -Recurse -Force
+Copy-Item -Path ".\earthguard-animation-fixed\earthguard-site\*" -Destination ".\earthguard-website-update" -Recurse -Force
 cd .\earthguard-website-update
 npm.cmd run check
 git status
@@ -61,10 +61,11 @@ runs at approximately 30 FPS on touch / 60 on desktop when the browser permits,
 and pauses offscreen or when the tab is hidden. These are rate caps, not promises
 of physical-device performance.
 
-Phones with Reduce Motion enabled show a static first frame and a visible
-**Play** control. Tapping Play explicitly enables the canvas animation. This
-makes the preference state clear rather than presenting a misleading Pause
-button on a static scene.
+Version 2.0.1 starts hero and section animation automatically on mobile, including
+phones that report Reduce Motion, as requested for this site. Pause remains
+available. An in-app-browser watchdog activates a 25 FPS timeout loop only if
+requestAnimationFrame stops advancing while the hero is visible. Native rAF
+recovery stops the fallback. Asset URLs are versioned to bypass stale scripts.
 
 `app.js` uses self-hosted GSAP and ScrollTrigger for entrance and section motion.
 Native scrolling is preserved. Content and interactions remain usable without
@@ -114,3 +115,10 @@ with the quotation. Supplier-photo permissions were not independently verified.
 - Clamp: https://www.escoelektrik.com/cubuk-klemensi-c-tipi
 - Air terminal: https://www.indonetwork.co.id/product/air-terminal-stainless-steel-air-rod-stainless-steel-3534734
 - Solar image, Soren H: https://unsplash.com/photos/a-large-array-of-solar-panels-on-the-roof-of-a-building-Db7Kt-7sulY
+
+## Animation-only patch validation
+
+Automatic canvas playback passed with Reduce Motion both on and off, with GSAP
+blocked, and with requestAnimationFrame deliberately stalled. Pause/resume and
+existing interactions passed. The visual design is unchanged from v2.0.0.
+Physical-phone verification remains outstanding.
