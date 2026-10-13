@@ -106,11 +106,12 @@
  // Geometry is the visibility authority; embedded browsers can delay or omit
  // IntersectionObserver callbacks. Keep the observer as a prompt, not a gate.
  function checkVisibility(){
-  const rect=stage.getBoundingClientRect();visible=rect.bottom>-80&&rect.top<innerHeight+80;
+  const rect=stage.getBoundingClientRect();visible=rect.bottom>-80&&rect.top<innerHeight+80&&(!window.EarthGuardActiveScene||window.EarthGuardActiveScene==='hero');
   if(!visible&&raf){cancelAnimationFrame(raf);raf=0;last=0;}else start();
  }
  if('IntersectionObserver' in window){new IntersectionObserver(checkVisibility,{rootMargin:'80px'}).observe(stage);}
  window.addEventListener('scroll',checkVisibility,{passive:true});
+ document.addEventListener('earthguard:active-scene',checkVisibility);
  window.addEventListener('pageshow',()=>{checkVisibility();lastRaf=performance.now();start();});
  // A low-frequency watchdog handles WebViews that suspend rAF while visible.
  // The timeout path is only active while rAF is stale, never alongside it.

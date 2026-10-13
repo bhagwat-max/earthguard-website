@@ -1,10 +1,10 @@
 {
   "name": "earthguard-website",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "private": true,
   "description": "EarthGuard premium website with self-hosted GSAP and mobile canvas animation",
   "scripts": {
     "dev": "node server.cjs",
-    "check": "node --check app.js && node --check scene.js && node --check server.cjs"
+    "check": "node --check app.js && node --check scene.js && node --check advanced-scenes.js && node --check server.cjs"
   }
 }

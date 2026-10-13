@@ -1,4 +1,4 @@
-# EarthGuard Premium — version 2.0.1
+# EarthGuard Premium — version 2.1.0
 
 A complete visual upgrade of the existing EarthGuard website. Cobalt, charcoal,
 self-hosted Inter typography, real category photographs and a live dimensional
@@ -16,17 +16,17 @@ build step, CDN, API key or external animation script is required.
 
 ## Update your existing repository
 
-Extract `earthguard-animation-fixed.zip` in Downloads. It contains `earthguard-site`.
+Extract `earthguard-advanced-mobile.zip` in Downloads. It contains `earthguard-site`.
 Copy those files into the repository you already cloned. Keep its `.git` folder.
 
 ```powershell
 cd C:\Users\vishvas\Downloads
-Copy-Item -Path ".\earthguard-animation-fixed\earthguard-site\*" -Destination ".\earthguard-website-update" -Recurse -Force
+Copy-Item -Path ".\earthguard-advanced-mobile\earthguard-site\*" -Destination ".\earthguard-website-update" -Recurse -Force
 cd .\earthguard-website-update
 npm.cmd run check
 git status
-git add index.html styles.css app.js scene.js server.cjs package.json README.md vercel.json .gitignore assets
-git commit -m "Upgrade EarthGuard design and mobile animation"
+git add index.html styles.css app.js scene.js advanced-scenes.js server.cjs package.json README.md vercel.json .gitignore assets
+git commit -m "Add mobile 3D scenes and animated connections"
 git push
 ```
 
@@ -61,7 +61,7 @@ runs at approximately 30 FPS on touch / 60 on desktop when the browser permits,
 and pauses offscreen or when the tab is hidden. These are rate caps, not promises
 of physical-device performance.
 
-Version 2.0.1 starts hero and section animation automatically on mobile, including
+Version 2.1.0 starts hero and section animation automatically on mobile, including
 phones that report Reduce Motion, as requested for this site. Pause remains
 available. An in-app-browser watchdog activates a 25 FPS timeout loop only if
 requestAnimationFrame stops advancing while the hero is visible. Native rAF
@@ -116,9 +116,43 @@ with the quotation. Supplier-photo permissions were not independently verified.
 - Air terminal: https://www.indonetwork.co.id/product/air-terminal-stainless-steel-air-rod-stainless-steel-3534734
 - Solar image, Soren H: https://unsplash.com/photos/a-large-array-of-solar-panels-on-the-roof-of-a-building-Db7Kt-7sulY
 
-## Animation-only patch validation
 
-Automatic canvas playback passed with Reduce Motion both on and off, with GSAP
-blocked, and with requestAnimationFrame deliberately stalled. Pause/resume and
-existing interactions passed. The visual design is unchanged from v2.0.0.
-Physical-phone verification remains outstanding.
+## New dimensional experiences in 2.1.0
+
+- An automatic exploded connection illustration assembles an electrode, clamp
+  and conductor. Touch tabs highlight each part and update the material enquiry
+  details. Hold assembled / Resume assembly controls the demonstration.
+- A rotating rooftop concept connects air-terminal, conductor and electrode
+  categories with a moving visual trace. Touch tabs identify each category.
+- A fine animated line connects the three enquiry-process steps horizontally
+  on desktop and vertically on phones.
+- Each larger illustration has its own Pause / Play button.
+
+`advanced-scenes.js` contains the new renderers and a shared activity coordinator.
+It uses viewport geometry rather than relying on IntersectionObserver support.
+Only one dimensional scene draws continuously at a time. Offscreen scenes keep
+one rendered frame and retain their animation state. The working hero renderer
+is preserved, with only an activity gate added for scene coordination.
+
+All new 3D-looking scenes are original geometry projected to Canvas 2D. They
+require no WebGL, external CDN, mouse hover, API key or build step. Self-hosted
+GSAP still handles section entrances. Automatic playback remains enabled on
+phones reporting Reduce Motion, as requested; Pause is available. Both animation
+engines include the timeout fallback used in the confirmed working mobile patch.
+
+The connection and rooftop scenes are concept illustrations, not engineering
+models or installation instructions. Components are illustrative, and the blue
+trace is a navigation cue rather than an electrical or lightning simulation.
+
+## Additional validation
+
+Passed touch emulation at nine widths from 320 to 1440 pixels with no horizontal
+page overflow. Inspected the complete desktop/mobile layouts and both new scene
+renders. Verified changing canvas pixel output and animation time in all four
+animated areas (hero, connection, rooftop, process), including Reduce Motion
+and deliberately stalled requestAnimationFrame with the GSAP files blocked.
+Verified only the active scene advances, offscreen clocks stop, pause/resume,
+component selections, assembly hold/resume and rooftop category selections.
+The original menu, product filters, enquiry dialogs, FAQ and copy-checklist
+interactions were regression-tested. No JavaScript errors were observed.
+Physical Instagram/Safari devices were not tested in this environment.
