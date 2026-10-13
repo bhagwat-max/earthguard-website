@@ -1,83 +1,116 @@
-# EarthGuard website
+# EarthGuard Premium — version 2.0.0
 
-Mobile-first static website for EarthGuard Earthing Solutions, Ahmedabad.
+A complete visual upgrade of the existing EarthGuard website. Cobalt, charcoal,
+self-hosted Inter typography, real category photographs and a live dimensional
+hero replace the original CSS-only sculpture.
 
-## Vercel deployment
-
-1. Extract this folder, create a GitHub repository, and upload its contents.
-2. In Vercel, choose **Add New → Project** and import that repository.
-3. Select **Other** as the framework preset. Leave the build command empty and set the output directory to `.`. Deploy.
-
-Alternative: with the Vercel CLI installed, run `vercel` inside this folder, then `vercel --prod` once the preview is approved. Sign in to your own Vercel account when prompted.
-
-## Local preview
-
-Run `npm.cmd run dev` in PowerShell (or `npm run dev` on macOS/Linux), then visit http://localhost:3000. Node.js is required; there are no dependencies to install.
-
-## Contents
-
-- `index.html`: sections, copy, enquiry dialogs and metadata.
-- `styles.css`: responsive design, CSS 3D sculpture, animated orbits, product illustrations, desktop hover effects, reduced-motion support.
-- `app.js`: menu, product filters, enquiry selection, dialogs, scroll reveal and pointer interactions.
-- `server.cjs`: dependency-free local preview that works on Windows, macOS and Linux.
-- `assets/`: self-hosted vector logo assets and optimized real photographs.
-- `vercel.json`: static hosting headers.
-
-There are no runtime dependencies, no payment system and no backend. Enquiries go to `tel:+919664763492` or `https://www.instagram.com/earthguard.earthing/`. Product enquiry buttons preserve the selected category in the contact dialog. The website does not submit or save enquiry data.
-
-Logo palette: cobalt `#0755F5`, charcoal `#101820`, white. Product imagery is illustrative of categories; final products are quoted against the buyer’s specifications. No manufacturer affiliation, certification, stock levels or completed-project claims are made.
-
-## Image sources
-
-- Earth rods: Socome, https://www.socomepower.com/Copper-Bonded-Earth-Rod-ERT-pd44090666.html
-- Grounding clamp: Esco Elektrik, https://www.escoelektrik.com/cubuk-klemensi-c-tipi
-- Air terminal: Sinar Utama Grounding / Indonetwork, https://www.indonetwork.co.id/product/air-terminal-stainless-steel-air-rod-stainless-steel-3534734
-- Solar rooftop: Soren H / Unsplash, https://unsplash.com/photos/a-large-array-of-solar-panels-on-the-roof-of-a-building-Db7Kt-7sulY
-
-Publicly retrieved product photos are included as requested. Supplier product-photo reuse rights were not verified. Replace them with your own supplier-authorized catalogue images for the production launch. Solar photo sourced from Unsplash. Conductor/SPD visuals and all 3D elements are original CSS illustrations.
-
-## Mobile fixes in version 1.0.1
-
-- Centred responsive sculpture scaling without clipping on small phones.
-- Transform-based floating/particle animations for broader mobile browser support.
-- Automatic animation on touch screens; pointer tilt remains available on desktop.
-- Offscreen animation suspension and lighter mobile shadows/blur for scrolling.
-- Flexible headings and contact rows across phone and tablet widths.
-- Safe-area spacing for the bottom contact bar and scrollable enquiry dialogs.
-- Scroll reveals with safe observer initialization; reduced-motion preferences are respected.
-
-## Replace your existing project and push
-
-Extract this ZIP. Copy the **contents inside `earthguard-site`** into your existing
-EarthGuard Git repository folder, replacing the matching files. Keep the existing
-`.git` directory. Do not create a nested `earthguard-site/earthguard-site` folder.
-
-Open a PowerShell terminal in that existing repository folder:
+## Run locally (Windows PowerShell)
 
 ```powershell
 npm.cmd run check
 npm.cmd run dev
 ```
 
-Preview http://localhost:3000. Press Ctrl+C to stop the preview, then:
+Open http://localhost:3000. Press Ctrl+C to stop. Node.js is required. No install,
+build step, CDN, API key or external animation script is required.
+
+## Update your existing repository
+
+Extract `earthguard-premium-v2.zip` in Downloads. It contains `earthguard-site`.
+Copy those files into the repository you already cloned. Keep its `.git` folder.
 
 ```powershell
+cd C:\Users\vishvas\Downloads
+Copy-Item -Path ".\earthguard-premium-v2\earthguard-site\*" -Destination ".\earthguard-website-update" -Recurse -Force
+cd .\earthguard-website-update
+npm.cmd run check
 git status
-git add index.html styles.css app.js server.cjs package.json README.md vercel.json assets
-git commit -m "Fix mobile layout and animation performance"
+git add index.html styles.css app.js scene.js server.cjs package.json README.md vercel.json .gitignore assets
+git commit -m "Upgrade EarthGuard design and mobile animation"
 git push
 ```
 
-Your existing Vercel project will redeploy if it is connected to this repository
-and branch. No new Vercel project is needed. The live site is not changed by
-extracting or previewing the ZIP.
+This updates https://github.com/bhagwat-max/earthguard-website. A connected
+Vercel Git deployment should then start automatically.
+
+## Deploy directly to your existing Vercel project
+
+From `earthguard-website-update`:
+
+```powershell
+npx.cmd vercel login
+npx.cmd vercel link
+npx.cmd vercel --prod
+```
+
+In `vercel link`, select your account/team, choose the existing project and select
+`earthguard-site` (verify it is the project hosting your current domain). Avoid
+creating a second project. If already linked, only the last command is needed.
+Framework preset: Other. Build command: empty. Output directory: `.`.
+
+## How the mobile animation works
+
+`scene.js` projects original 3D geometry into a 2D canvas. It needs no WebGL and
+uses no CSS 3D animation. The electrode floats, the layers turn, current traces
+orbit and a light travels along the spine. Motion starts automatically on touch
+screens and keeps working if GSAP is blocked. Mouse movement only adds a small
+optional desktop camera offset; it does not start the animation.
+
+Resolution is capped (1.5 device-pixel ratio on touch, 2 on desktop). Animation
+runs at approximately 30 FPS on touch / 60 on desktop when the browser permits,
+and pauses offscreen or when the tab is hidden. These are rate caps, not promises
+of physical-device performance.
+
+Phones with Reduce Motion enabled show a static first frame and a visible
+**Play** control. Tapping Play explicitly enables the canvas animation. This
+makes the preference state clear rather than presenting a misleading Pause
+button on a static scene.
+
+`app.js` uses self-hosted GSAP and ScrollTrigger for entrance and section motion.
+Native scrolling is preserved. Content and interactions remain usable without
+GSAP. The mobile quick-contact bar appears after the hero so it cannot cover
+the scene controls. Fonts, libraries and product images are all included.
+
+## Interactions
+
+- Accessible mobile menu with focus handling, Escape and background inertness.
+- Category filters and visible category counts.
+- Product-specific enquiry dialogs with call/Instagram routes.
+- Native FAQ accordions and a copyable material-enquiry checklist.
+- Reading progress and safe-area spacing on phones.
+- Portrait/landscape dialog sizing and reduced-motion support.
+
+There is no backend or form submission. The checklist is copied locally;
+enquiries go through your phone or Instagram. Canvas and generated conductor/SPD
+illustrations are brand/category visuals, not technical system designs.
 
 ## Validation
 
-Passed Chromium touch emulation at viewport widths 320, 360, 390, 430, 540,
-768, 820, 1024 and 1440 pixels, with no document horizontal overflow or
-nondecorative content outside the viewport. Inspected the full mobile render.
-Passed automatic animation progression, pause/resume, mobile menu, product
-filters, enquiry context, portrait and landscape dialog fit, scroll reveals,
-reduced-motion rendering and JavaScript error checks. JavaScript syntax checks
-passed. Real iPhone/Safari and physical-device frame rates were not measured.
+Chromium checks passed at widths 320, 360, 390, 430, 540, 768, 820, 1024 and
+1440 pixels with no horizontal page overflow or ordinary content outside the
+viewport. Desktop/mobile renders were visually inspected. JavaScript checks
+and local asset references passed.
+
+Android/Instagram user-agent + touch emulation passed three configurations:
+normal motion; reduced motion with manual Play; GSAP/ScrollTrigger blocked.
+Canvas pixel output and elapsed animation time changed in each playback test.
+Pause/resume, menu, filters, product context, portrait/landscape dialogs, FAQ,
+checklist feedback and content visibility passed without JavaScript errors.
+This is browser emulation, not a physical Instagram or Safari device test.
+
+## Libraries and fonts
+
+- GSAP 3.15.0 and ScrollTrigger: self-hosted minified distributions, original
+  copyright/license headers preserved. https://gsap.com/standard-license/
+- Inter variable Latin font: self-hosted via Fontsource. OFL license included
+  in `assets/vendor/INTER-LICENSE.txt`.
+
+## Image sources (retained from the original project)
+
+Photos illustrate material categories. Final products and pricing are confirmed
+with the quotation. Supplier-photo permissions were not independently verified.
+
+- Earth rods: https://www.socomepower.com/Copper-Bonded-Earth-Rod-ERT-pd44090666.html
+- Clamp: https://www.escoelektrik.com/cubuk-klemensi-c-tipi
+- Air terminal: https://www.indonetwork.co.id/product/air-terminal-stainless-steel-air-rod-stainless-steel-3534734
+- Solar image, Soren H: https://unsplash.com/photos/a-large-array-of-solar-panels-on-the-roof-of-a-building-Db7Kt-7sulY

@@ -1,40 +1,60 @@
 'use strict';
-const $ = s => document.querySelector(s);
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-const menuToggle = $('.menu-toggle');
-const mobileMenu = $('#mobile-menu');
-function closeMenu(){menuToggle.setAttribute('aria-expanded','false');menuToggle.setAttribute('aria-label','Open menu');mobileMenu.hidden=true;}
-menuToggle.addEventListener('click',()=>{const open=menuToggle.getAttribute('aria-expanded')==='true';menuToggle.setAttribute('aria-expanded',String(!open));menuToggle.setAttribute('aria-label',open?'Open menu':'Close menu');mobileMenu.hidden=open;});
-mobileMenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMenu));
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
-window.addEventListener('resize',()=>{if(window.innerWidth>800)closeMenu();});
-const enquiry=$('#enquiry-dialog');
-document.querySelectorAll('[data-enquire]').forEach(button=>button.addEventListener('click',()=>{const product=button.dataset.product;const context=$('#enquiry-context');context.hidden=!product;context.textContent=product?`Your enquiry: ${product}`:'';enquiry.showModal();}));
-const credits=$('#credits-dialog');$('#credits-open').addEventListener('click',()=>credits.showModal());
-document.querySelectorAll('dialog').forEach(dialog=>{dialog.querySelector('.dialog-close').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',event=>{const box=dialog.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)dialog.close();});});
-document.querySelectorAll('.filter').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.filter').forEach(other=>{other.classList.toggle('active',other===button);other.setAttribute('aria-pressed',String(other===button));});document.querySelectorAll('.product-card').forEach(card=>{card.hidden=button.dataset.filter!=='all'&&card.dataset.category!==button.dataset.filter;if(!card.hidden)card.classList.add('visible');});}));
-$('#year').textContent=String(new Date().getFullYear());
-// Reveal once on entry; content remains visible if observer setup fails.
-if(!reducedMotion.matches && 'IntersectionObserver' in window){
- const elements=[...document.querySelectorAll('.reveal')];
- try {
-  const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
-   if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target);}
-  }),{threshold:0,rootMargin:'0px 0px -12px 0px'});
-  elements.forEach((element,index)=>{element.style.transitionDelay=`${(index%3)*45}ms`;observer.observe(element);});
-  document.documentElement.classList.add('js-motion');
- } catch(error){document.documentElement.classList.remove('js-motion');}
-}
-// Keep CSS motion automatic on touch screens; pointer tilt is desktop-only.
-// Pause offscreen sculptures to leave the phone GPU free for scrolling.
-if('IntersectionObserver' in window){
- const sceneObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
-  entry.target.classList.toggle('scene-offscreen',!entry.isIntersecting);
- }),{rootMargin:'100px'});
- document.querySelectorAll('.hero-art,.statement').forEach(scene=>sceneObserver.observe(scene));
-}
-document.addEventListener('visibilitychange',()=>{
- document.documentElement.classList.toggle('page-inactive',document.hidden);
+const $=s=>document.querySelector(s);
+const preference=window.matchMedia('(prefers-reduced-motion: reduce)');
+const toggle=$('.menu-toggle'),menu=$('#mobile-menu');
+const background=[document.querySelector('main'),document.querySelector('footer'),$('.mobile-contact')];
+function closeMenu(returnFocus=false){toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','Open menu');menu.hidden=true;document.body.classList.remove('menu-open');background.forEach(e=>{if(e)e.inert=false;});if(returnFocus)toggle.focus();}
+toggle.addEventListener('click',()=>{const open=toggle.getAttribute('aria-expanded')==='true';if(open){closeMenu();return;}menu.hidden=false;toggle.setAttribute('aria-expanded','true');toggle.setAttribute('aria-label','Close menu');document.body.classList.add('menu-open');background.forEach(e=>{if(e)e.inert=true;});menu.querySelector('a').focus();});
+menu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>closeMenu()));
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&!menu.hidden){closeMenu(true);}
+ if(e.key==='Tab'&&!menu.hidden){const links=[toggle,...menu.querySelectorAll('a')];const first=links[0],last=links[links.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
 });
-let paused=false;$('#motion-toggle').addEventListener('click',()=>{paused=!paused;document.documentElement.classList.toggle('motion-paused',paused);$('#motion-toggle').textContent=paused?'▶':'Ⅱ';$('#motion-toggle').setAttribute('aria-label',paused?'Resume animations':'Pause animations');$('#motion-toggle').setAttribute('aria-pressed',String(paused));});
-if(window.matchMedia('(hover: hover) and (pointer: fine)').matches&&!reducedMotion.matches){const art=$('.hero-art');const sculpture=$('#sculpture');let frame=0;art.addEventListener('pointermove',event=>{if(paused)return;if(frame)cancelAnimationFrame(frame);frame=requestAnimationFrame(()=>{const r=art.getBoundingClientRect();sculpture.style.setProperty('--rx',`${((event.clientY-r.top)/r.height-.5)*-14}deg`);sculpture.style.setProperty('--ry',`${((event.clientX-r.left)/r.width-.5)*22}deg`);});});art.addEventListener('pointerleave',()=>{sculpture.style.setProperty('--rx','0deg');sculpture.style.setProperty('--ry','0deg');});document.querySelectorAll('.tilt').forEach(card=>{card.addEventListener('pointermove',event=>{if(paused)return;const r=card.getBoundingClientRect();const x=(event.clientX-r.left)/r.width-.5;const y=(event.clientY-r.top)/r.height-.5;card.style.transform=`perspective(1200px) rotateX(${-y*5}deg) rotateY(${x*5}deg) translateY(-4px)`;});card.addEventListener('pointerleave',()=>card.style.removeProperty('transform'));});}
+window.addEventListener('resize',()=>{if(window.innerWidth>800)closeMenu();},{passive:true});
+function showDialog(dialog){closeMenu();if(typeof dialog.showModal==='function')dialog.showModal();else{dialog.setAttribute('open','');dialog.classList.add('dialog-fallback');}}
+document.querySelectorAll('[data-enquire]').forEach(button=>button.addEventListener('click',()=>{const context=$('#enquiry-context');context.hidden=!button.dataset.product;context.textContent=button.dataset.product?`Your enquiry: ${button.dataset.product}`:'';showDialog($('#enquiry-dialog'));}));
+$('#credits-open').addEventListener('click',()=>showDialog($('#credits-dialog')));
+document.querySelectorAll('dialog').forEach(dialog=>{dialog.querySelector('.dialog-close').addEventListener('click',()=>{if(typeof dialog.close==='function')dialog.close();else dialog.removeAttribute('open');});dialog.addEventListener('click',event=>{if(event.target!==dialog)return;const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom){if(typeof dialog.close==='function')dialog.close();else dialog.removeAttribute('open');}});});
+$('#year').textContent=String(new Date().getFullYear());
+document.querySelectorAll('.filter').forEach(button=>button.addEventListener('click',()=>{
+ document.querySelectorAll('.filter').forEach(other=>{const active=other===button;other.classList.toggle('active',active);other.setAttribute('aria-pressed',String(active));});
+ const shown=[];
+ document.querySelectorAll('.product-card').forEach(card=>{const show=button.dataset.filter==='all'||card.dataset.category===button.dataset.filter;card.hidden=!show;if(show)shown.push(card);});
+ $('#filter-result').textContent=`${shown.length} ${shown.length===1?'category':'categories'}`;
+ if(window.gsap){gsap.killTweensOf('.product-card');gsap.set(shown,{clearProps:'opacity,transform,visibility'});if(!preference.matches)gsap.fromTo(shown,{opacity:0,y:10},{opacity:1,y:0,duration:.35,stagger:.04,clearProps:'opacity,transform,visibility',overwrite:true});}
+ if(window.ScrollTrigger)ScrollTrigger.refresh();
+}));
+let progressFrame=0;
+function updateProgress(){progressFrame=0;const height=document.documentElement.scrollHeight-innerHeight;$('.reading-progress').style.transform=`scaleX(${height>0?Math.min(1,scrollY/height):0})`;$('.mobile-contact').classList.toggle('is-visible',$('.hero-stage').getBoundingClientRect().bottom<88);}
+window.addEventListener('scroll',()=>{if(!progressFrame)progressFrame=requestAnimationFrame(updateProgress);},{passive:true});
+window.addEventListener('resize',updateProgress,{passive:true});updateProgress();
+const checklist='EarthGuard material enquiry\n\nMaterial / category:\nSpecifications / datasheet:\nQuantity:\nDelivery location:\nRequired date:\nProject / company:\nContact number:';
+$('#copy-checklist').addEventListener('click',async()=>{
+ const status=$('#copy-status');status.textContent='Copying checklist…';
+ let timeout;
+ try {await Promise.race([navigator.clipboard.writeText(checklist),new Promise((_,reject)=>{timeout=setTimeout(()=>reject(new Error('Clipboard unavailable')),1200);})]);status.textContent='Copied. Paste it into your message.';}
+ catch(error){
+  const textarea=document.createElement('textarea');textarea.value=checklist;textarea.style.cssText='position:fixed;left:0;top:0;width:1px;height:1px;opacity:0';document.body.append(textarea);textarea.select();let copied=false;
+  try{copied=document.execCommand('copy');}catch(error){}textarea.remove();
+  status.textContent=copied?'Copied. Paste it into your message.':'Include material, specifications, quantity and delivery location.';
+ } finally {clearTimeout(timeout);}
+});
+// Self-hosted GSAP; the whole site remains usable if the library is unavailable.
+if(window.gsap&&window.ScrollTrigger){
+ gsap.registerPlugin(ScrollTrigger);
+ ScrollTrigger.config({ignoreMobileResize:true});
+ const media=gsap.matchMedia();
+ media.add('(prefers-reduced-motion: no-preference)',()=>{
+  gsap.fromTo('.hero-enter',{y:20,opacity:0},{y:0,opacity:1,duration:.8,stagger:.09,ease:'power3.out',clearProps:'opacity,transform'});
+  gsap.fromTo('.hero-stage',{y:25,opacity:0},{y:0,opacity:1,duration:1,ease:'power3.out',delay:.15,clearProps:'opacity,transform'});
+  document.querySelectorAll('.reveal').forEach(el=>{
+   gsap.fromTo(el,{y:22,opacity:0},{y:0,opacity:1,duration:.65,ease:'power3.out',immediateRender:false,clearProps:'opacity,transform',scrollTrigger:{trigger:el,start:'top 94%',once:true}});
+  });
+  gsap.to('.statement-lines',{xPercent:7,duration:12,repeat:-1,yoyo:true,ease:'sine.inOut',scrollTrigger:{trigger:'.statement',start:'top bottom',end:'bottom top',toggleActions:'play pause resume pause'}});
+ });
+ document.addEventListener('earthguard:motion',e=>{
+  gsap.getTweensOf('.statement-lines').forEach(tween=>e.detail.paused?tween.pause():tween.resume());
+ });
+ window.addEventListener('load',()=>ScrollTrigger.refresh(),{once:true});
+ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>ScrollTrigger.refresh());
+}
