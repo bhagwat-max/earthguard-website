@@ -1,0 +1,10 @@
+{
+  "name": "earthguard-website",
+  "version": "1.0.1",
+  "private": true,
+  "description": "EarthGuard responsive static website",
+  "scripts": {
+    "dev": "node server.cjs",
+    "check": "node --check app.js && node --check server.cjs"
+  }
+}
